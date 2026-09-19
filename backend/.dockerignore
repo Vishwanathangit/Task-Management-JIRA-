@@ -1,0 +1,11 @@
+node_modules
+dist
+.env
+.git
+.gitignore
+*.log
+.vscode
+.eslintrc.json
+.prettierrc
+**/*.test.ts
+coverage
