@@ -14,7 +14,12 @@ const app: Express = express();
 app.use(helmet());
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json());
-app.use(cors());
+app.use(
+  cors({
+    origin: env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 app.use(cookieParser());
 
 app.use(globalLimiter);

@@ -2,11 +2,17 @@
 # GitHub Actions CI/CD Workflow for Monorepo Backend Service
 #
 # SETUP INSTRUCTIONS:
-# 1. Required Repository Secrets (Settings > Secrets and variables > Actions):
+# 1. Required Repository Secrets (Settings > Secrets and variables > Actions > Secrets tab):
 #    - DATABASE_URL: PostgreSQL connection string for the test environment.
 #    - JWT_SECRET: Secret key for signing test JWT tokens.
 #
-# 2. Scope & Future Extension:
+# 2. Required Repository Variables (Settings > Secrets and variables > Actions > Variables tab):
+#    - NODE_ENV (e.g. "test")
+#    - PORT (e.g. "5000")
+#    - FRONTEND_URL (e.g. "http://localhost:3000", or the real deployed frontend URL)
+#    - JWT_EXPIRES_IN (e.g. "1d")
+#
+# 3. Scope & Future Extension:
 #    - This workflow is scoped strictly to the backend/ folder.
 #    - A separate frontend CI workflow/job (using working-directory: frontend,
 #      paths: ['frontend/**'], and ghcr.io/<owner>/<repo>-frontend) is planned for when the frontend is ready.
@@ -35,10 +41,10 @@ jobs:
         working-directory: backend
 
     env:
-      NODE_ENV: test
-      PORT: 5000
-      FRONTEND_URL: http://localhost:5173
-      JWT_EXPIRES_IN: 1d
+      NODE_ENV: ${{ vars.NODE_ENV }}
+      PORT: ${{ vars.PORT }}
+      FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+      JWT_EXPIRES_IN: ${{ vars.JWT_EXPIRES_IN }}
       DATABASE_URL: ${{ secrets.DATABASE_URL }}
       JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
