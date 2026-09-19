@@ -1,5 +1,6 @@
 import * as React from 'react';
 
+import { ThemeToggle } from '@/components/common/ThemeToggle';
 import { useAuthStore } from '@/store/authStore';
 
 export const Navbar: React.FC = () => {
@@ -10,14 +11,17 @@ export const Navbar: React.FC = () => {
       <div className="flex items-center gap-2 font-bold text-foreground">
         <span>Task Management</span>
       </div>
-      {user && (
-        <div className="flex items-center gap-4 text-sm text-muted-foreground">
-          <span>{user.name}</span>
-          <span className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
-            {user.role}
-          </span>
-        </div>
-      )}
+      <div className="flex items-center gap-4">
+        {user && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <span>{user.name}</span>
+            <span className="rounded bg-accent px-2 py-0.5 text-xs font-medium text-accent-foreground">
+              {user.role}
+            </span>
+          </div>
+        )}
+        <ThemeToggle />
+      </div>
     </header>
   );
 };
