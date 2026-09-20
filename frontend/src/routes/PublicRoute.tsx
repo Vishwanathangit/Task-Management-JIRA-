@@ -4,16 +4,20 @@ import { Navigate, Outlet } from 'react-router-dom';
 import { PageLoader } from '@/components/common/PageLoader';
 import { useAuthStore } from '@/store/authStore';
 
-export const ProtectedRoute: React.FC = () => {
+interface PublicRouteProps {
+  children?: React.ReactNode;
+}
+
+export const PublicRoute: React.FC<PublicRouteProps> = ({ children }) => {
   const { isAuthenticated, isCheckingAuth } = useAuthStore();
 
   if (isCheckingAuth) {
     return <PageLoader label="Verifying session..." />;
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  if (isAuthenticated) {
+    return <Navigate to="/projects" replace />;
   }
 
-  return <Outlet />;
+  return children ? <>{children}</> : <Outlet />;
 };

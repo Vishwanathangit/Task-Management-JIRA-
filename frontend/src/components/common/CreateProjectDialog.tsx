@@ -59,7 +59,7 @@ export const CreateProjectDialog: React.FC<CreateProjectDialogProps> = ({ isOpen
       title="Create Project"
       description="Add a new project to organize and track tasks"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         {errorMessage && (
           <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive border border-destructive/30">
             {errorMessage}

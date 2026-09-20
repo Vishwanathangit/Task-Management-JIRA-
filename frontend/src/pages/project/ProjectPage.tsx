@@ -43,13 +43,13 @@ export const ProjectPage: React.FC = () => {
 
   if (error || !currentProject) {
     return (
-      <div className="flex min-h-[300px] flex-col items-center justify-center space-y-4 text-center">
+      <div className="flex min-h-75 flex-col items-center justify-center space-y-4 text-center">
         <h2 className="text-xl font-semibold text-foreground">Project Not Found</h2>
         <p className="text-sm text-muted-foreground">
           {error || 'The requested project could not be loaded.'}
         </p>
-        <Button variant="outline" onClick={() => navigate('/dashboard')}>
-          Back to Dashboard
+        <Button variant="outline" onClick={() => navigate('/projects')}>
+          Back to Projects
         </Button>
       </div>
     );
@@ -59,7 +59,7 @@ export const ProjectPage: React.FC = () => {
     try {
       await deleteProject(currentProject.id);
       setIsDeleteOpen(false);
-      navigate('/dashboard');
+      navigate('/projects');
     } catch {
       // Handled by store
     }
@@ -68,7 +68,7 @@ export const ProjectPage: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
+        <Button variant="ghost" size="icon" onClick={() => navigate('/projects')}>
           <ArrowLeft className="h-5 w-5" />
         </Button>
         <div className="flex-1">
@@ -118,7 +118,7 @@ export const ProjectPage: React.FC = () => {
         {isTaskLoading && tasks.length === 0 ? (
           <PageLoader label="Loading tasks..." />
         ) : tasks.length === 0 ? (
-          <div className="flex min-h-[200px] flex-col items-center justify-center rounded-lg border border-dashed border-border p-6 text-center">
+          <div className="flex min-h-50 flex-col items-center justify-center rounded-lg border border-dashed border-border p-6 text-center">
             <CheckCircle2 className="h-10 w-10 text-muted-foreground/40 mb-2" />
             <h4 className="text-sm font-semibold text-foreground">No tasks yet</h4>
             <p className="text-xs text-muted-foreground mt-1">

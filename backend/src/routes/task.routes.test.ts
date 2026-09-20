@@ -98,4 +98,42 @@ describe('Task Router Integration Tests (/api/v1/task)', (): void => {
       expect(response.body.data.task.status).toBe(TASK_STATUS.PRODUCTION);
     });
   });
+
+  describe('GET /api/v1/task', (): void => {
+    it('should return tasks matching search query by assignee name', async (): Promise<void> => {
+      vi.spyOn(taskService, 'getAllTasks').mockImplementationOnce(async (filters) => {
+        expect(filters?.search).toBe('John Doe');
+        return {
+          tasks: [sampleTask],
+          pagination: { page: 1, limit: 10, total: 1, totalPages: 1 },
+        };
+      });
+
+      const response = await request(app)
+        .get('/api/v1/task?search=John%20Doe')
+        .set('Cookie', [`token=${devToken}`]);
+
+      expect(response.status).toBe(200);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.tasks).toHaveLength(1);
+    });
+
+    it('should return tasks matching search query by project name', async (): Promise<void> => {
+      vi.spyOn(taskService, 'getAllTasks').mockImplementationOnce(async (filters) => {
+        expect(filters?.search).toBe('E-commerce');
+        return {
+          tasks: [sampleTask],
+          pagination: { page: 1, limit: 10, total: 1, totalPages: 1 },
+        };
+      });
+
+      const response = await request(app)
+        .get('/api/v1/task?search=E-commerce')
+        .set('Cookie', [`token=${devToken}`]);
+
+      expect(response.status).toBe(200);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.tasks).toHaveLength(1);
+    });
+  });
 });

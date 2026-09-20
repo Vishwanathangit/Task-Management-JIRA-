@@ -1,9 +1,30 @@
 import axiosInstance from './axiosInstance';
-import type { IProject, IProjectInput, IUpdateProjectInput } from '@/types/project.types';
+import type {
+  IPaginationMeta,
+  IProject,
+  IProjectFilterParams,
+  IProjectInput,
+  IUpdateProjectInput,
+} from '@/types/project.types';
 
-export const getProjects = async (): Promise<IProject[]> => {
-  const response = await axiosInstance.get('/project');
-  return response.data.data.projects || response.data.data || [];
+export interface IGetProjectsResponse {
+  projects: IProject[];
+  pagination: IPaginationMeta;
+}
+
+export const getProjects = async (params?: IProjectFilterParams): Promise<IGetProjectsResponse> => {
+  const response = await axiosInstance.get('/project', { params });
+  const data = response.data?.data;
+  if (Array.isArray(data)) {
+    return {
+      projects: data,
+      pagination: { page: 1, limit: data.length || 10, total: data.length, totalPages: 1 },
+    };
+  }
+  return {
+    projects: data?.projects || [],
+    pagination: data?.pagination || { page: 1, limit: 10, total: 0, totalPages: 1 },
+  };
 };
 
 export const getProjectById = async (id: string): Promise<IProject> => {

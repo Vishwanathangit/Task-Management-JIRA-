@@ -38,14 +38,17 @@ export const getAllTasksController = async (
 ): Promise<void> => {
   try {
     const filters = {
+      search: req.query.search as string | undefined,
       projectId: req.query.projectId as string | undefined,
       assignedTo: req.query.assignedTo as string | undefined,
       status: req.query.status as TaskStatus | undefined,
+      page: req.query.page ? Number(req.query.page) : undefined,
+      limit: req.query.limit ? Number(req.query.limit) : undefined,
     };
-    const tasks = await getAllTasks(filters);
+    const { tasks, pagination } = await getAllTasks(filters);
     res.status(200).json({
       status: 'success',
-      data: { tasks },
+      data: { tasks, pagination },
     });
   } catch (err) {
     next(err);

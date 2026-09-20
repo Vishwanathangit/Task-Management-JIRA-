@@ -1,9 +1,16 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, gte, ilike, isNull, lte } from 'drizzle-orm';
 
 import { db } from '../config/db';
 import { projects } from '../models/project.model';
 import { IProject, IProjectInput, IUpdateProjectInput } from '../types/project.types';
 import { createAppError } from '../utils/AppError';
+
+export interface IProjectPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 export const createProject = async (
   input: IProjectInput,
@@ -25,8 +32,44 @@ export const createProject = async (
   return newProject;
 };
 
-export const getAllProjects = async (): Promise<IProject[]> => {
-  return db.select().from(projects).where(isNull(projects.deletedAt));
+export const getAllProjects = async (params?: {
+  search?: string;
+  fromDate?: string;
+  toDate?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{ projects: IProject[]; pagination: IProjectPagination }> => {
+  const page = Math.max(1, Number(params?.page) || 1);
+  const limit = Math.max(1, Number(params?.limit) || 10);
+  const offset = (page - 1) * limit;
+
+  const conditions = [isNull(projects.deletedAt)];
+  if (params?.search) {
+    conditions.push(ilike(projects.name, `%${params.search}%`));
+  }
+  if (params?.fromDate) {
+    conditions.push(gte(projects.createdAt, new Date(params.fromDate)));
+  }
+  if (params?.toDate) {
+    const end = params.toDate.includes('T')
+      ? new Date(params.toDate)
+      : new Date(`${params.toDate}T23:59:59.999Z`);
+    conditions.push(lte(projects.createdAt, end));
+  }
+
+  const allFiltered = await db
+    .select()
+    .from(projects)
+    .where(and(...conditions));
+
+  const total = allFiltered.length;
+  const totalPages = Math.ceil(total / limit) || 1;
+  const paginatedProjects = allFiltered.slice(offset, offset + limit);
+
+  return {
+    projects: paginatedProjects,
+    pagination: { page, limit, total, totalPages },
+  };
 };
 
 export const getProjectById = async (id: string): Promise<IProject> => {

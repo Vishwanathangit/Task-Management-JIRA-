@@ -7,6 +7,7 @@ interface AuthState {
   user: IUserResponse | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  isCheckingAuth: boolean;
   login: (input: ILoginInput) => Promise<void>;
   signup: (input: ISignupInput) => Promise<void>;
   logout: () => Promise<void>;
@@ -17,6 +18,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   isAuthenticated: false,
   isLoading: false,
+  isCheckingAuth: true,
 
   login: async (input: ILoginInput) => {
     set({ isLoading: true });
@@ -50,12 +52,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   checkAuth: async () => {
-    set({ isLoading: true });
+    set({ isCheckingAuth: true });
     try {
       const user = await getCurrentUser();
-      set({ user, isAuthenticated: true, isLoading: false });
+      set({ user, isAuthenticated: true, isCheckingAuth: false });
     } catch {
-      set({ user: null, isAuthenticated: false, isLoading: false });
+      set({ user: null, isAuthenticated: false, isCheckingAuth: false });
+    } finally {
+      set({ isCheckingAuth: false });
     }
   },
 }));

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 
 import {
+  getCurrentUserController,
   loginController,
   logoutController,
   signupController,
@@ -15,5 +16,6 @@ const authRouter = Router();
 authRouter.post('/signup', authLimiter, validate(signupSchema), signupController);
 authRouter.post('/login', authLimiter, validate(loginSchema), loginController);
 authRouter.post('/logout', authenticate, logoutController);
+authRouter.get('/me', authenticate, getCurrentUserController);
 
 export default authRouter;

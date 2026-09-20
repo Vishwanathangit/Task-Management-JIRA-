@@ -13,11 +13,21 @@ export interface ITask {
   deletedAt?: string | null;
 }
 
+export interface ITaskFilterParams {
+  search?: string;
+  projectId?: string;
+  assignedTo?: string;
+  status?: TaskStatus;
+  page?: number;
+  limit?: number;
+}
+
 export interface ITaskInput {
   projectId: string;
   title: string;
   description?: string;
   assignedTo?: string;
+  status?: TaskStatus;
 }
 
 export interface IUpdateTaskInput {

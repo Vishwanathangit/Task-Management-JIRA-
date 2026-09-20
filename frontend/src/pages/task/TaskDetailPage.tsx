@@ -9,6 +9,7 @@ import { PageLoader } from '@/components/common/PageLoader';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { TASK_STATUS, type TaskStatus } from '@/constants/taskStatus';
 import { useTaskStore } from '@/store/taskStore';
@@ -61,7 +62,7 @@ export const TaskDetailPage: React.FC = () => {
 
   if (error || !currentTask) {
     return (
-      <div className="flex min-h-[300px] flex-col items-center justify-center space-y-4 text-center">
+      <div className="flex min-h-75 flex-col items-center justify-center space-y-4 text-center">
         <h2 className="text-xl font-semibold text-foreground">Task Not Found</h2>
         <p className="text-sm text-muted-foreground">
           {error || 'The requested task could not be loaded.'}
@@ -73,8 +74,7 @@ export const TaskDetailPage: React.FC = () => {
     );
   }
 
-  const handleStatusChange = async (e: React.ChangeEvent<HTMLSelectElement>): Promise<void> => {
-    const newStatus = e.target.value as TaskStatus;
+  const handleStatusChange = async (newStatus: TaskStatus): Promise<void> => {
     try {
       await updateTaskStatus(currentTask.id, newStatus);
       await fetchTaskById(currentTask.id);
@@ -154,17 +154,21 @@ export const TaskDetailPage: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <select
+          <Select
             value={currentTask.status}
-            onChange={(e) => void handleStatusChange(e)}
-            className="h-9 rounded-md border border-input bg-background px-3 py-1 text-xs font-medium shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring text-foreground"
+            onValueChange={(val) => void handleStatusChange(val as TaskStatus)}
           >
-            {statusOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger className="w-35 text-xs font-medium">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {statusOptions.map((opt) => (
+                <SelectItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button variant="outline" size="sm" onClick={() => setIsAssignOpen(true)} className="gap-1.5">
             <UserPlus className="h-4 w-4" />
             Assign
@@ -214,7 +218,7 @@ export const TaskDetailPage: React.FC = () => {
             <div className="space-y-4 border-l-2 border-border pl-4">
               {timeline.map((item) => (
                 <div key={item.id} className="relative space-y-1">
-                  <div className="absolute -left-[21px] top-1 h-2.5 w-2.5 rounded-full bg-primary" />
+                  <div className="absolute -left-5.25 top-1 h-2.5 w-2.5 rounded-full bg-primary" />
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-foreground">{item.actorName}</span>
                     <span className="text-xs text-muted-foreground">
@@ -234,7 +238,7 @@ export const TaskDetailPage: React.FC = () => {
           )}
 
           {/* Add Comment Form */}
-          <form onSubmit={(e) => void handleAddComment(e)} className="space-y-3 pt-4 border-t border-border">
+          <form onSubmit={(e) => void handleAddComment(e)} noValidate className="space-y-3 pt-4 border-t border-border">
             <Textarea
               placeholder="Write a comment..."
               value={commentText}

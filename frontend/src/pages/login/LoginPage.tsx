@@ -31,7 +31,7 @@ export const LoginPage: React.FC = () => {
     setErrorMessage(null);
     try {
       await login(data);
-      navigate('/dashboard');
+      navigate('/projects');
     } catch (err: unknown) {
       if (err instanceof AxiosError && err.response?.data?.message) {
         setErrorMessage(err.response.data.message);
@@ -48,7 +48,7 @@ export const LoginPage: React.FC = () => {
           <CardTitle className="text-2xl font-bold tracking-tight">Welcome back</CardTitle>
           <CardDescription>Enter your credentials to access your account</CardDescription>
         </CardHeader>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <CardContent className="space-y-4">
             {errorMessage && (
               <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive border border-destructive/30">

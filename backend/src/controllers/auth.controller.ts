@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from 'express';
 
 import { env } from '../config/env';
-import { login, signup } from '../services/auth.service';
+import { getCurrentUser, login, signup } from '../services/auth.service';
+import { createAppError } from '../utils/AppError';
 
 export const signupController = async (
   req: Request,
@@ -48,6 +49,25 @@ export const logoutController = (req: Request, res: Response, next: NextFunction
     res.status(200).json({
       status: 'success',
       message: 'Logged out successfully',
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getCurrentUserController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    if (!req.user) {
+      return next(createAppError('Unauthorized', 401));
+    }
+    const user = await getCurrentUser(req.user.userId);
+    res.status(200).json({
+      status: 'success',
+      data: { user },
     });
   } catch (err) {
     next(err);

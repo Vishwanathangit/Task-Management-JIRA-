@@ -87,7 +87,7 @@ export const AssignTaskDialog: React.FC<AssignTaskDialogProps> = ({
       title="Assign Task"
       description="Choose a team member to assign this task to"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-4">
         {errorMessage && (
           <div className="rounded-md bg-destructive/15 p-3 text-sm font-medium text-destructive border border-destructive/30">
             {errorMessage}

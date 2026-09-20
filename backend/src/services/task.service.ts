@@ -1,12 +1,21 @@
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq, ilike, isNull, or } from 'drizzle-orm';
 
 import { db } from '../config/db';
 import { TASK_ACTIONS } from '../constants/taskAction';
 import { TaskStatus } from '../constants/taskStatus';
+import { projects } from '../models/project.model';
 import { tasks } from '../models/task.model';
+import { users } from '../models/user.model';
 import { ITask, ITaskInput, IUpdateTaskInput } from '../types/task.types';
 import { createAppError } from '../utils/AppError';
 import { recordTaskHistory } from '../utils/recordTaskHistory';
+
+export interface ITaskPagination {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+}
 
 export const createTask = async (input: ITaskInput, creatorId: string): Promise<ITask> => {
   const [newTask] = await db
@@ -16,6 +25,7 @@ export const createTask = async (input: ITaskInput, creatorId: string): Promise<
       title: input.title,
       description: input.description ?? null,
       assignedTo: input.assignedTo ?? null,
+      ...(input.status && { status: input.status }),
       createdBy: creatorId,
     })
     .returning();
@@ -36,12 +46,30 @@ export const createTask = async (input: ITaskInput, creatorId: string): Promise<
 };
 
 export const getAllTasks = async (filters?: {
+  search?: string;
   projectId?: string;
   assignedTo?: string;
   status?: TaskStatus;
-}): Promise<ITask[]> => {
+  page?: number;
+  limit?: number;
+}): Promise<{ tasks: ITask[]; pagination: ITaskPagination }> => {
+  const page = Math.max(1, Number(filters?.page) || 1);
+  const limit = Math.max(1, Number(filters?.limit) || 10);
+  const offset = (page - 1) * limit;
+
   const conditions = [isNull(tasks.deletedAt)];
 
+  if (filters?.search) {
+    const searchTerm = `%${filters.search}%`;
+    conditions.push(
+      or(
+        ilike(tasks.title, searchTerm),
+        ilike(users.name, searchTerm),
+        ilike(projects.name, searchTerm),
+        ilike(tasks.status, searchTerm)
+      )!
+    );
+  }
   if (filters?.projectId) {
     conditions.push(eq(tasks.projectId, filters.projectId));
   }
@@ -52,12 +80,22 @@ export const getAllTasks = async (filters?: {
     conditions.push(eq(tasks.status, filters.status));
   }
 
-  const result = await db
-    .select()
+  const rows = await db
+    .select({ task: tasks })
     .from(tasks)
+    .leftJoin(users, eq(tasks.assignedTo, users.id))
+    .leftJoin(projects, eq(tasks.projectId, projects.id))
     .where(and(...conditions));
 
-  return result as ITask[];
+  const allFiltered = rows.map((r) => r.task as ITask);
+  const total = allFiltered.length;
+  const totalPages = Math.ceil(total / limit) || 1;
+  const paginatedTasks = allFiltered.slice(offset, offset + limit);
+
+  return {
+    tasks: paginatedTasks,
+    pagination: { page, limit, total, totalPages },
+  };
 };
 
 export const getTaskById = async (taskId: string): Promise<ITask> => {
