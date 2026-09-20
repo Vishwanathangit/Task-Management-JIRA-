@@ -43,3 +43,16 @@ export interface ITaskHistory {
   note?: string | null;
   createdAt: string;
 }
+
+export interface ITimelineItem {
+  id: string;
+  type: 'HISTORY' | 'COMMENT';
+  actorId: string;
+  actorName: string;
+  action?: string;
+  fromValue?: string | null;
+  toValue?: string | null;
+  note?: string | null;
+  message?: string;
+  createdAt: string;
+}

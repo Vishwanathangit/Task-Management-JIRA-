@@ -5,6 +5,7 @@ import {
   assignTask,
   createTask,
   getAllTasks,
+  getTaskById,
   softDeleteTask,
   updateTask,
   updateTaskStatus,
@@ -45,6 +46,22 @@ export const getAllTasksController = async (
     res.status(200).json({
       status: 'success',
       data: { tasks },
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getTaskByIdController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+): Promise<void> => {
+  try {
+    const task = await getTaskById(req.params.id as string);
+    res.status(200).json({
+      status: 'success',
+      data: { task },
     });
   } catch (err) {
     next(err);

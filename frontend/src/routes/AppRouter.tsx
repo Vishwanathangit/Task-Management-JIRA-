@@ -6,6 +6,8 @@ import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { LoginPage } from '@/pages/login/LoginPage';
 import { ProjectPage } from '@/pages/project/ProjectPage';
 import { SignupPage } from '@/pages/signup/SignupPage';
+
+import { TaskDetailPage } from '@/pages/task/TaskDetailPage';
 import { TaskPage } from '@/pages/task/TaskPage';
 
 import { ProtectedRoute } from './ProtectedRoute';
@@ -41,6 +43,10 @@ const router = createBrowserRouter([
           {
             path: 'projects/:id',
             element: <ProjectPage />,
+          },
+          {
+            path: 'projects/:projectId/tasks/:taskId',
+            element: <TaskDetailPage />,
           },
           {
             path: 'tasks',

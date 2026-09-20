@@ -10,6 +10,7 @@ import {
   createTaskController,
   deleteTaskController,
   getAllTasksController,
+  getTaskByIdController,
   updateTaskController,
   updateTaskStatusController,
 } from '../controllers/task.controller';
@@ -37,6 +38,7 @@ taskRouter.post(
   createTaskController
 );
 taskRouter.get('/', authenticate, getAllTasksController);
+taskRouter.get('/:id', authenticate, getTaskByIdController);
 taskRouter.patch('/:id', authenticate, validate(updateTaskSchema), updateTaskController);
 taskRouter.patch(
   '/:id/assign',

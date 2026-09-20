@@ -2,8 +2,8 @@ import axiosInstance from './axiosInstance';
 import type {
   IAssignTaskInput,
   ITask,
-  ITaskHistory,
   ITaskInput,
+  ITimelineItem,
   IUpdateTaskInput,
   IUpdateTaskStatusInput,
 } from '@/types/task.types';
@@ -46,7 +46,7 @@ export const deleteTask = async (id: string): Promise<void> => {
   await axiosInstance.delete(`/task/${id}`);
 };
 
-export const getTaskTimeline = async (id: string): Promise<ITaskHistory[]> => {
+export const getTaskTimeline = async (id: string): Promise<ITimelineItem[]> => {
   const response = await axiosInstance.get(`/task/${id}/timeline`);
-  return response.data.data.history || response.data.data || [];
+  return response.data.data.timeline || response.data.data.history || response.data.data || [];
 };
