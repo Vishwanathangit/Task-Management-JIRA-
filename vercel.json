@@ -6,7 +6,7 @@
     },
     "backend": {
       "root": "backend",
-      "entrypoint": "api/index.ts",
+      "entrypoint": "dist/api/index.js",
       "installCommand": "npm install --include=dev",
       "buildCommand": "npm run build"
     }
