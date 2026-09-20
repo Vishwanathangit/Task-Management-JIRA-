@@ -1,5 +1,5 @@
 # ==============================================================================
-# GitHub Actions CI/CD Workflow for Monorepo Backend Service
+# GitHub Actions CI/CD Workflow for Monorepo (Backend & Frontend Services)
 #
 # SETUP INSTRUCTIONS:
 # 1. Required Repository Secrets (Settings > Secrets and variables > Actions > Secrets tab):
@@ -9,24 +9,25 @@
 # 2. Required Repository Variables (Settings > Secrets and variables > Actions > Variables tab):
 #    - NODE_ENV (e.g. "test")
 #    - PORT (e.g. "5000")
-#    - FRONTEND_URL (e.g. "http://localhost:3000", or the real deployed frontend URL)
+#    - FRONTEND_URL (e.g. "http://localhost:3000", or the deployed frontend URL)
+#    - VITE_API_BASE_URL (the API base URL for the frontend build, e.g. http://localhost:5000/api/v1)
 #    - JWT_EXPIRES_IN (e.g. "1d")
 #
-# 3. Scope & Future Extension:
-#    - This workflow is scoped strictly to the backend/ folder.
-#    - A separate frontend CI workflow/job (using working-directory: frontend,
-#      paths: ['frontend/**'], and ghcr.io/<owner>/<repo>-frontend) is planned for when the frontend is ready.
+# 3. Scope & Coverage:
+#    - Covers both backend and frontend applications in a single monorepo pipeline.
+#    - Linting, type checking, unit/integration testing, and Docker image builds
+#      for both services pushed to GitHub Container Registry (GHCR).
 # ==============================================================================
 
-name: Backend CI/CD Pipeline
+name: CI/CD Pipeline
 
 on:
   push:
     branches: [main]
-    paths: ['backend/**', '.github/workflows/ci.yml']
+    paths: ['backend/**', 'frontend/**', '.github/workflows/ci.yml']
   pull_request:
     branches: [main]
-    paths: ['backend/**', '.github/workflows/ci.yml']
+    paths: ['backend/**', 'frontend/**', '.github/workflows/ci.yml']
 
 permissions:
   contents: read
@@ -106,3 +107,73 @@ jobs:
           tags: |
             ghcr.io/${{ steps.repo-name.outputs.owner }}/${{ steps.repo-name.outputs.name }}-backend:latest
             ghcr.io/${{ steps.repo-name.outputs.owner }}/${{ steps.repo-name.outputs.name }}-backend:${{ github.sha }}
+
+  frontend-lint-and-build:
+    name: Lint, Type Check & Build (Frontend)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+      - name: Run TypeScript Check
+        run: npx tsc --noEmit
+
+      - name: Build Frontend SPA
+        env:
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
+        run: npm run build
+
+  frontend-build-and-push:
+    name: Build & Push Frontend Docker Image to GHCR
+    needs: frontend-lint-and-build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Compute Lowercase Repository Names
+        id: repo-name
+        run: |
+          echo "owner=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+          echo "name=$(echo "${{ github.event.repository.name }}" | tr '[:upper:]' '[:lower:]')" >> $GITHUB_OUTPUT
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          build-args: |
+            VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}
+          tags: |
+            ghcr.io/${{ steps.repo-name.outputs.owner }}/${{ steps.repo-name.outputs.name }}-frontend:latest
+            ghcr.io/${{ steps.repo-name.outputs.owner }}/${{ steps.repo-name.outputs.name }}-frontend:${{ github.sha }}
