@@ -71,3 +71,23 @@ export const login = async (
 
   return { user: userResponse, token };
 };
+
+export const getCurrentUser = async (userId: string): Promise<IUserResponse> => {
+  const matchingUsers = await db
+    .select()
+    .from(users)
+    .where(and(eq(users.id, userId), isNull(users.deletedAt)));
+
+  const user = matchingUsers[0];
+  if (!user) {
+    throw createAppError('User not found', 404);
+  }
+
+  return {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    role: user.role as Role,
+    createdAt: user.createdAt,
+  };
+};

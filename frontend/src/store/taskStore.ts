@@ -12,16 +12,25 @@ import {
   updateTaskStatus as apiUpdateTaskStatus,
 } from '@/api/task.api';
 import type { TaskStatus } from '@/constants/taskStatus';
-import type { ITask, ITaskInput, ITimelineItem, IUpdateTaskInput } from '@/types/task.types';
+import type { IPaginationMeta } from '@/types/project.types';
+import type {
+  ITask,
+  ITaskFilterParams,
+  ITaskInput,
+  ITimelineItem,
+  IUpdateTaskInput,
+} from '@/types/task.types';
 
 interface TaskState {
   tasks: ITask[];
+  pagination: IPaginationMeta;
   currentTask: ITask | null;
   timeline: ITimelineItem[];
   isLoading: boolean;
   error: string | null;
 
   fetchTasksByProject: (projectId: string) => Promise<void>;
+  fetchAllTasks: (params?: ITaskFilterParams) => Promise<void>;
   fetchTaskById: (id: string) => Promise<ITask | null>;
   createTask: (input: ITaskInput) => Promise<ITask>;
   updateTask: (id: string, input: IUpdateTaskInput) => Promise<ITask>;
@@ -34,6 +43,7 @@ interface TaskState {
 
 export const useTaskStore = create<TaskState>((set, get) => ({
   tasks: [],
+  pagination: { page: 1, limit: 10, total: 0, totalPages: 1 },
   currentTask: null,
   timeline: [],
   isLoading: false,
@@ -42,8 +52,19 @@ export const useTaskStore = create<TaskState>((set, get) => ({
   fetchTasksByProject: async (projectId: string) => {
     set({ isLoading: true, error: null });
     try {
-      const tasks = await apiGetTasks(projectId);
-      set({ tasks, isLoading: false });
+      const { tasks, pagination } = await apiGetTasks({ projectId });
+      set({ tasks, pagination, isLoading: false });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch tasks';
+      set({ error: message, isLoading: false });
+    }
+  },
+
+  fetchAllTasks: async (params?: ITaskFilterParams) => {
+    set({ isLoading: true, error: null });
+    try {
+      const { tasks, pagination } = await apiGetTasks(params);
+      set({ tasks, pagination, isLoading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to fetch tasks';
       set({ error: message, isLoading: false });

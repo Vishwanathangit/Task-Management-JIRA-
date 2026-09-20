@@ -8,6 +8,7 @@ import {
   updateProject,
 } from '../services/project.service';
 import { createAppError } from '../utils/AppError';
+import { projectQuerySchema } from '../validators/project.validator';
 
 export const createProjectController = async (
   req: Request,
@@ -29,15 +30,28 @@ export const createProjectController = async (
 };
 
 export const getAllProjectsController = async (
-  _req: Request,
+  req: Request,
   res: Response,
   next: NextFunction
 ): Promise<void> => {
   try {
-    const projects = await getAllProjects();
+    const parsed = projectQuerySchema.safeParse(req.query);
+    if (!parsed.success) {
+      const errorMessage = parsed.error.issues.map((i) => i.message).join(', ');
+      return next(createAppError(errorMessage, 400));
+    }
+
+    const { search, fromDate, toDate, page, limit } = parsed.data;
+    const { projects, pagination } = await getAllProjects({
+      search,
+      fromDate,
+      toDate,
+      page,
+      limit,
+    });
     res.status(200).json({
       status: 'success',
-      data: { projects },
+      data: { projects, pagination },
     });
   } catch (err) {
     next(err);

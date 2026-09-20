@@ -72,10 +72,32 @@ describe('Project Router Integration Tests (/api/v1/project)', (): void => {
 
   describe('GET /api/v1/project', (): void => {
     it('should return list of projects for authenticated users', async (): Promise<void> => {
-      vi.spyOn(projectService, 'getAllProjects').mockResolvedValueOnce([sampleProject]);
+      vi.spyOn(projectService, 'getAllProjects').mockResolvedValueOnce({
+        projects: [sampleProject],
+        pagination: { page: 1, limit: 10, total: 1, totalPages: 1 },
+      });
 
       const response = await request(app)
         .get('/api/v1/project')
+        .set('Cookie', [`token=${devToken}`]);
+
+      expect(response.status).toBe(200);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.projects).toHaveLength(1);
+    });
+
+    it('should filter projects by fromDate and toDate', async (): Promise<void> => {
+      vi.spyOn(projectService, 'getAllProjects').mockImplementationOnce(async (params) => {
+        expect(params?.fromDate).toBe('2026-01-01');
+        expect(params?.toDate).toBe('2026-12-31');
+        return {
+          projects: [sampleProject],
+          pagination: { page: 1, limit: 10, total: 1, totalPages: 1 },
+        };
+      });
+
+      const response = await request(app)
+        .get('/api/v1/project?fromDate=2026-01-01&toDate=2026-12-31')
         .set('Cookie', [`token=${devToken}`]);
 
       expect(response.status).toBe(200);

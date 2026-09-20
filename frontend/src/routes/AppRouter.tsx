@@ -2,24 +2,32 @@ import * as React from 'react';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 
 import { AppShell } from '@/components/layout/AppShell';
-import { DashboardPage } from '@/pages/dashboard/DashboardPage';
 import { LoginPage } from '@/pages/login/LoginPage';
 import { ProjectPage } from '@/pages/project/ProjectPage';
+import { ProjectsPage } from '@/pages/project/ProjectsPage';
 import { SignupPage } from '@/pages/signup/SignupPage';
-
 import { TaskDetailPage } from '@/pages/task/TaskDetailPage';
 import { TaskPage } from '@/pages/task/TaskPage';
 
 import { ProtectedRoute } from './ProtectedRoute';
+import { PublicRoute } from './PublicRoute';
 
 const router = createBrowserRouter([
   {
     path: '/login',
-    element: <LoginPage />,
+    element: (
+      <PublicRoute>
+        <LoginPage />
+      </PublicRoute>
+    ),
   },
   {
     path: '/signup',
-    element: <SignupPage />,
+    element: (
+      <PublicRoute>
+        <SignupPage />
+      </PublicRoute>
+    ),
   },
   {
     path: '/',
@@ -27,18 +35,14 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Navigate to="/dashboard" replace />,
+        element: <Navigate to="/projects" replace />,
       },
       {
         element: <ProtectedRoute />,
         children: [
           {
-            path: 'dashboard',
-            element: <DashboardPage />,
-          },
-          {
             path: 'projects',
-            element: <DashboardPage />,
+            element: <ProjectsPage />,
           },
           {
             path: 'projects/:id',
@@ -58,7 +62,7 @@ const router = createBrowserRouter([
   },
   {
     path: '*',
-    element: <Navigate to="/dashboard" replace />,
+    element: <Navigate to="/projects" replace />,
   },
 ]);
 

@@ -7,6 +7,16 @@ export const createTaskSchema = z.object({
   title: z.string().min(2, 'Title must be at least 2 characters'),
   description: z.string().optional(),
   assignedTo: z.string().uuid('Invalid assigned user ID').optional(),
+  status: z
+    .enum([
+      TASK_STATUS.TODO,
+      TASK_STATUS.IN_PROGRESS,
+      TASK_STATUS.COMPLETED,
+      TASK_STATUS.STAGING,
+      TASK_STATUS.PRODUCTION,
+      TASK_STATUS.CLOSED,
+    ])
+    .optional(),
 });
 
 export const updateTaskSchema = z

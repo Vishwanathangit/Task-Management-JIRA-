@@ -7,15 +7,22 @@ import {
   getProjects as apiGetProjects,
   updateProject as apiUpdateProject,
 } from '@/api/project.api';
-import type { IProject, IProjectInput, IUpdateProjectInput } from '@/types/project.types';
+import type {
+  IPaginationMeta,
+  IProject,
+  IProjectFilterParams,
+  IProjectInput,
+  IUpdateProjectInput,
+} from '@/types/project.types';
 
 interface ProjectState {
   projects: IProject[];
+  pagination: IPaginationMeta;
   currentProject: IProject | null;
   isLoading: boolean;
   error: string | null;
 
-  fetchProjects: () => Promise<void>;
+  fetchProjects: (params?: IProjectFilterParams) => Promise<void>;
   fetchProjectById: (id: string) => Promise<IProject | null>;
   createProject: (input: IProjectInput) => Promise<IProject>;
   updateProject: (id: string, input: IUpdateProjectInput) => Promise<IProject>;
@@ -24,15 +31,16 @@ interface ProjectState {
 
 export const useProjectStore = create<ProjectState>((set) => ({
   projects: [],
+  pagination: { page: 1, limit: 10, total: 0, totalPages: 1 },
   currentProject: null,
   isLoading: false,
   error: null,
 
-  fetchProjects: async () => {
+  fetchProjects: async (params?: IProjectFilterParams) => {
     set({ isLoading: true, error: null });
     try {
-      const projects = await apiGetProjects();
-      set({ projects, isLoading: false });
+      const { projects, pagination } = await apiGetProjects(params);
+      set({ projects, pagination, isLoading: false });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Failed to fetch projects';
       set({ error: message, isLoading: false });

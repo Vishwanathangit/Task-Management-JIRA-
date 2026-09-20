@@ -3,9 +3,20 @@ import { z } from 'zod';
 import { TASK_STATUS } from '@/constants/taskStatus';
 
 export const createTaskSchema = z.object({
+  projectId: z.string().optional(),
   title: z.string().min(2, 'Title must be at least 2 characters'),
   description: z.string().optional(),
   assignedTo: z.string().optional(),
+  status: z
+    .enum([
+      TASK_STATUS.TODO,
+      TASK_STATUS.IN_PROGRESS,
+      TASK_STATUS.COMPLETED,
+      TASK_STATUS.STAGING,
+      TASK_STATUS.PRODUCTION,
+      TASK_STATUS.CLOSED,
+    ])
+    .optional(),
 });
 
 export type CreateTaskFormData = z.infer<typeof createTaskSchema>;

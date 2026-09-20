@@ -1,17 +1,33 @@
 import axiosInstance from './axiosInstance';
+import type { IPaginationMeta } from '@/types/project.types';
 import type {
   IAssignTaskInput,
   ITask,
+  ITaskFilterParams,
   ITaskInput,
   ITimelineItem,
   IUpdateTaskInput,
   IUpdateTaskStatusInput,
 } from '@/types/task.types';
 
-export const getTasks = async (projectId?: string): Promise<ITask[]> => {
-  const url = projectId ? `/task?projectId=${projectId}` : '/task';
-  const response = await axiosInstance.get(url);
-  return response.data.data.tasks || response.data.data || [];
+export interface IGetTasksResponse {
+  tasks: ITask[];
+  pagination: IPaginationMeta;
+}
+
+export const getTasks = async (params?: ITaskFilterParams): Promise<IGetTasksResponse> => {
+  const response = await axiosInstance.get('/task', { params });
+  const data = response.data?.data;
+  if (Array.isArray(data)) {
+    return {
+      tasks: data,
+      pagination: { page: 1, limit: data.length || 10, total: data.length, totalPages: 1 },
+    };
+  }
+  return {
+    tasks: data?.tasks || [],
+    pagination: data?.pagination || { page: 1, limit: 10, total: 0, totalPages: 1 },
+  };
 };
 
 export const getTaskById = async (id: string): Promise<ITask> => {
