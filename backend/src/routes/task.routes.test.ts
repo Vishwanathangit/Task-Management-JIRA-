@@ -13,6 +13,10 @@ describe('Task Router Integration Tests (/api/v1/task)', (): void => {
     userId: '123e4567-e89b-12d3-a456-426614174002',
     role: ROLES.DEVELOPER,
   });
+  const testerToken = generateToken({
+    userId: '123e4567-e89b-12d3-a456-426614174003',
+    role: ROLES.TESTER,
+  });
 
   const sampleTask = {
     id: '123e4567-e89b-12d3-a456-426614174000',
@@ -34,6 +38,23 @@ describe('Task Router Integration Tests (/api/v1/task)', (): void => {
       const response = await request(app)
         .post('/api/v1/task')
         .set('Cookie', [`token=${pmToken}`])
+        .send({
+          projectId: '123e4567-e89b-12d3-a456-426614174099',
+          title: 'Setup Auth Module',
+          description: 'Build user auth',
+        });
+
+      expect(response.status).toBe(201);
+      expect(response.body.status).toBe('success');
+      expect(response.body.data.task.title).toBe('Setup Auth Module');
+    });
+
+    it('should allow TESTER to create task and return 201', async (): Promise<void> => {
+      vi.spyOn(taskService, 'createTask').mockResolvedValueOnce(sampleTask);
+
+      const response = await request(app)
+        .post('/api/v1/task')
+        .set('Cookie', [`token=${testerToken}`])
         .send({
           projectId: '123e4567-e89b-12d3-a456-426614174099',
           title: 'Setup Auth Module',

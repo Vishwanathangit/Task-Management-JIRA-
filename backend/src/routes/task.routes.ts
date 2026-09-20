@@ -33,7 +33,7 @@ const taskRouter = Router();
 taskRouter.post(
   '/',
   authenticate,
-  authorize(ROLES.PM, ROLES.SCRUM_MASTER, ROLES.DEVELOPER),
+  authorize(ROLES.PM, ROLES.SCRUM_MASTER, ROLES.DEVELOPER, ROLES.TESTER),
   validate(createTaskSchema),
   createTaskController
 );
