@@ -74,7 +74,7 @@ export const ProjectPage: React.FC = () => {
         <div className="flex-1">
           <h1 className="text-2xl font-bold tracking-tight text-foreground">{currentProject.name}</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Created on {new Date(currentProject.createdAt).toLocaleDateString()}
+            Created on {new Date(currentProject.createdAt).toLocaleDateString('en-GB')}
           </p>
         </div>
         {isPm && (

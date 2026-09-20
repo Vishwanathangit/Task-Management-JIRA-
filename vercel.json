@@ -6,9 +6,8 @@
     },
     "backend": {
       "root": "backend",
-      "entrypoint": "dist/api/index.js",
-      "installCommand": "npm install --include=dev",
-      "buildCommand": "npm run build"
+      "entrypoint": "src/api/index.ts",
+      "installCommand": "npm install --include=dev"
     }
   },
   "rewrites": [

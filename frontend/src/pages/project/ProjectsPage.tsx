@@ -191,7 +191,7 @@ export const ProjectsPage: React.FC = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="text-xs text-muted-foreground">
-                  Created: {new Date(project.createdAt).toLocaleDateString()}
+                  Created: {new Date(project.createdAt).toLocaleDateString('en-GB')}
                 </CardContent>
                 <CardFooter className="pt-0">
                   <Button
