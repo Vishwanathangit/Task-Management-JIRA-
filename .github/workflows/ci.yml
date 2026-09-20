@@ -10,7 +10,7 @@
 #    - NODE_ENV (e.g. "test")
 #    - PORT (e.g. "5000")
 #    - FRONTEND_URL (e.g. "http://localhost:3000", or the deployed frontend URL)
-#    - VITE_API_URL (the API base URL for the frontend build, e.g. http://localhost:5000/api/v1)
+#    - VITE_API_BASE_URL (the API base URL for the frontend build, e.g. http://localhost:5000/api/v1)
 #    - JWT_EXPIRES_IN (e.g. "1d")
 #
 # 3. Scope & Coverage:
@@ -137,7 +137,7 @@ jobs:
 
       - name: Build Frontend SPA
         env:
-          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_API_BASE_URL: ${{ vars.VITE_API_BASE_URL }}
         run: npm run build
 
   frontend-build-and-push:
@@ -173,7 +173,7 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           build-args: |
-            VITE_API_URL=${{ vars.VITE_API_URL }}
+            VITE_API_BASE_URL=${{ vars.VITE_API_BASE_URL }}
           tags: |
             ghcr.io/${{ steps.repo-name.outputs.owner }}/${{ steps.repo-name.outputs.name }}-frontend:latest
             ghcr.io/${{ steps.repo-name.outputs.owner }}/${{ steps.repo-name.outputs.name }}-frontend:${{ github.sha }}
