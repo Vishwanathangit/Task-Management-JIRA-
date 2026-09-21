@@ -11,6 +11,8 @@ import rootRouter from './routes/index';
 
 const app: Express = express();
 
+app.set('trust proxy', 1);
+
 app.use(helmet());
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json());
