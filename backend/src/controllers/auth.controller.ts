@@ -10,7 +10,10 @@ export const signupController = async (
   next: NextFunction
 ): Promise<void> => {
   try {
-    const user = await signup(req.body);
+    const { user, token } = await signup(req.body);
+
+    res.cookie('token', token, getCookieOptions());
+
     res.status(201).json({
       status: 'success',
       data: { user },
