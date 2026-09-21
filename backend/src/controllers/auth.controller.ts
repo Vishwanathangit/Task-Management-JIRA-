@@ -20,6 +20,12 @@ export const signupController = async (
   }
 };
 
+const getCookieOptions = (): import('express').CookieOptions => ({
+  httpOnly: true,
+  secure: env.NODE_ENV === 'production',
+  sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+});
+
 export const loginController = async (
   req: Request,
   res: Response,
@@ -28,11 +34,7 @@ export const loginController = async (
   try {
     const { user, token } = await login(req.body);
 
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
+    res.cookie('token', token, getCookieOptions());
 
     res.status(200).json({
       status: 'success',
@@ -45,7 +47,7 @@ export const loginController = async (
 
 export const logoutController = (req: Request, res: Response, next: NextFunction): void => {
   try {
-    res.clearCookie('token');
+    res.clearCookie('token', getCookieOptions());
     res.status(200).json({
       status: 'success',
       message: 'Logged out successfully',
