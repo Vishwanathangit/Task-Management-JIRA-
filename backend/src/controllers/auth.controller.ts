@@ -23,7 +23,7 @@ export const signupController = async (
 const getCookieOptions = (): import('express').CookieOptions => ({
   httpOnly: true,
   secure: env.NODE_ENV === 'production',
-  sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
+  sameSite: 'lax',
 });
 
 export const loginController = async (
@@ -38,7 +38,7 @@ export const loginController = async (
 
     res.status(200).json({
       status: 'success',
-      data: { user, token },
+      data: { user },
     });
   } catch (err) {
     next(err);

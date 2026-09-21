@@ -76,7 +76,7 @@ describe('Auth Router Integration Tests (/api/v1/auth)', (): void => {
 
       expect(response.status).toBe(200);
       expect(response.body.status).toBe('success');
-      expect(response.body.data.token).toBe('mocked.jwt.token');
+      expect(response.body.data.user.email).toBe(sampleUser.email);
       expect(response.headers['set-cookie']).toBeDefined();
     });
 
