@@ -9,7 +9,9 @@ import { comparePassword, hashPassword } from '../utils/hashPassword';
 import { generateToken } from '../utils/jwt';
 import { ILoginInput, ISignupInput } from '../validators/user.validator';
 
-export const signup = async (input: ISignupInput): Promise<IUserResponse> => {
+export const signup = async (
+  input: ISignupInput
+): Promise<{ user: IUserResponse; token: string }> => {
   const existingUsers = await db.select().from(users).where(eq(users.email, input.email));
   if (existingUsers.length > 0) {
     throw createAppError('Email is already in use', 409);
@@ -31,13 +33,18 @@ export const signup = async (input: ISignupInput): Promise<IUserResponse> => {
     throw createAppError('Failed to create user', 500);
   }
 
-  return {
+  const role = newUser.role as Role;
+  const token = generateToken({ userId: newUser.id, role });
+
+  const userResponse: IUserResponse = {
     id: newUser.id,
     name: newUser.name,
     email: newUser.email,
-    role: newUser.role as Role,
+    role,
     createdAt: newUser.createdAt,
   };
+
+  return { user: userResponse, token };
 };
 
 export const login = async (

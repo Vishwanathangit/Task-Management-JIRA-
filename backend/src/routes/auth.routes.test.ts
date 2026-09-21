@@ -17,8 +17,11 @@ describe('Auth Router Integration Tests (/api/v1/auth)', (): void => {
   };
 
   describe('POST /api/v1/auth/signup', (): void => {
-    it('should successfully signup a new user and return 201', async (): Promise<void> => {
-      vi.spyOn(authService, 'signup').mockResolvedValueOnce(sampleUser);
+    it('should successfully signup a new user, set token cookie and return 201', async (): Promise<void> => {
+      vi.spyOn(authService, 'signup').mockResolvedValueOnce({
+        user: sampleUser,
+        token: 'mocked.jwt.token',
+      });
 
       const response = await request(app).post('/api/v1/auth/signup').send({
         name: 'Test User',
@@ -30,6 +33,7 @@ describe('Auth Router Integration Tests (/api/v1/auth)', (): void => {
       expect(response.status).toBe(201);
       expect(response.body.status).toBe('success');
       expect(response.body.data.user.email).toBe(sampleUser.email);
+      expect(response.headers['set-cookie']).toBeDefined();
     });
 
     it('should reject signup with duplicate email and return 409', async (): Promise<void> => {
